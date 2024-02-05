@@ -1,20 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using DialogueEditor;
 
 public class Movement : MonoBehaviour
 {
+    public NPCConversation myConversation;
     public float moveSpeed = 5, bodySpeed = 5, steerSpeed = 180;
-    public int Gap = 10;
+    public int Gap = 10, fruitNeeded;
     public bool death = false, haschanged = false;
     public GameObject bodyPrefab, dragonPrefab;
     public Transform pos;
     private List<GameObject> BodyParts = new List<GameObject>();
     private List<Vector3> PositionsHistory = new List<Vector3>();
+    private float convTimer;
+    public GameObject EndPanel;
     // Start is called before the first frame update
     void Start()
     {
+        ConversationManager.Instance.StartConversation(myConversation);
         //GrowSnake();
         //GrowSnake();
     }
@@ -22,7 +28,9 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(!death)
+        ConversationManager.Instance.SetInt("BodyParts", BodyParts.Count);
+        //Debug.Log(ConversationManager.Instance.GetInt("BodyParts"));
+        if (!death)
         {
             transform.position += transform.forward * moveSpeed * Time.deltaTime;
             float steerDirection = Input.GetAxis("Horizontal");
@@ -45,6 +53,33 @@ public class Movement : MonoBehaviour
             
             
         }
+        if (ConversationManager.Instance != null)
+        {
+            if (ConversationManager.Instance.IsConversationActive)
+            {
+                convTimer += Time.deltaTime;
+            }
+            if(convTimer > 2f)
+            {
+                Debug.Log("next");
+                ConversationManager.Instance.PressSelectedOption();
+                convTimer = 0;
+            }
+        }
+        if (BodyParts.Count >= fruitNeeded)
+        {
+            EndPanel.SetActive(true);
+        }
+        //if (Input.GetKey("m") && MenuPanel.activeSelf)
+        //{
+        //    MenuPanel.SetActive(false);
+        //    Time.timeScale = 1;
+        //}
+        //else if (Input.GetKey("m") && !MenuPanel.activeSelf)
+        //{
+        //    MenuPanel.SetActive(true);
+        //    Time.timeScale = 0;
+        //}
     }
     private void GrowSnake()
     {
@@ -55,10 +90,14 @@ public class Movement : MonoBehaviour
     {
         death = true;
     }
-    public void SwitchScenes()
-    {
-        SceneManager.LoadScene("Level1");
-    }
+    //public void NextLevel(int levelToLoad)
+    //{
+    //    SceneManager.LoadScene("Level" + levelToLoad.ToString());
+    //}
+    //public void ExitLevel()
+    //{
+    //    SceneManager.LoadScene("StartScene");
+    //}
     void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.tag == "Fruit")
@@ -66,10 +105,10 @@ public class Movement : MonoBehaviour
             Destroy(collision.gameObject);
             GrowSnake();
         }
-        else if (collision.gameObject.tag == "Wall" && BodyParts.Count >= 7)
+        else if (collision.gameObject.tag == "Wall" && BodyParts.Count >= fruitNeeded)
         {
             KillSnake();
-            SwitchScenes();
+            //NextLevel(1);
         }
         else if (collision.gameObject.tag == "Wall" || collision.gameObject.tag == "Player")
         {
