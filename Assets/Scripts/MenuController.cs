@@ -7,24 +7,16 @@ using UnityEngine.SceneManagement;
 public class MenuController : MonoBehaviour
 {
     public GameObject MenuPanel;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
     void Update()
-    {
+    {//Open and close the menu
         if(Input.GetKeyUp("m") && MenuPanel.activeSelf)
         {
-            Debug.Log("test2");
             MenuPanel.SetActive(false);
             Time.timeScale = 1;
         }
         else if (Input.GetKeyUp("m") && !MenuPanel.activeSelf)
         {
-            Debug.Log("test1");
             MenuPanel.SetActive(true);
             Time.timeScale = 0;
         }
@@ -40,5 +32,10 @@ public class MenuController : MonoBehaviour
     public void ExitLevel()
     {
         SceneManager.LoadScene("StartScene");
+    }
+    public void ExitGame()
+    {
+        SceneManager.LoadScene("SampleScene");
+        //Application.Quit();
     }
 }
